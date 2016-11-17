@@ -110,7 +110,7 @@ public class BFS {
 	
 	public int radius(){
 		int radius=Integer.MAX_VALUE;
-		int tempRadius=0;
+		int tempRadius=Integer.MAX_VALUE;
 		for(int i=0; i<graph.length; i++){
 			AlgoBFS(i);
 			tempRadius =maxDistance();
