@@ -109,6 +109,7 @@ public class BFS {
 	}
 	
 	public int radius(){
+		if(!isConnected()) return -1;
 		int radius=Integer.MAX_VALUE;
 		int tempRadius=Integer.MAX_VALUE;
 		for(int i=0; i<graph.length; i++){
