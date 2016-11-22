@@ -25,6 +25,8 @@ public class Graph {
 	int  numOfNodes, numOfEdges,startNode,numOfQueries;
 	double[] distance;
 	List<Edge>[] graph;
+	List<Edge>[] wholeGraph;
+	double maxWeights;
 
 
 	public int getNumOfNodes() {
@@ -45,18 +47,20 @@ public class Graph {
 
 
 	public boolean areTheyNeighbours(int v, int u){
-		for(int i = 0 ; i < graph[v].size() ; i++){
-			if(graph[v].get(i).to == u) return true;
+		for(int i = 0 ; i < wholeGraph[v].size() ; i++){
+			if(wholeGraph[v].get(i).to == u) return true;
 		}
 		return false;
 	}
 	//creates connectivty matrix
 	public boolean [][] neighboursMatrix(){
-		boolean[][] mat = new boolean[graph.length][graph.length];
-		for(int i = 0 ; i < graph.length ; i++){
-			for(int j = 0 ; j < graph.length ; j++){
+		boolean[][] mat = new boolean[wholeGraph.length][wholeGraph.length];
+//		System.out.println(graph.length);
+//		System.out.println(graph[99].size());
+		for(int i = 0 ; i < wholeGraph.length ; i++){
+			for(int j = 0 ; j < wholeGraph.length ; j++){
 
-
+//				System.out.println(i + " " + j);
 				if(areTheyNeighbours( i, j))
 					mat[i][j] = true;
 			}
@@ -78,9 +82,9 @@ public class Graph {
 
 	//finding the weight between 2 edges
 	public double findWeightBetween2Edges( int u, int v){
-		for(int i = 0 ; i < graph[u].size() ; i++){
-			if(graph[u].get(i).to == v)
-				return graph[u].get(i).weight;
+		for(int i = 0 ; i < wholeGraph[u].size() ; i++){
+			if(wholeGraph[u].get(i).to == v)
+				return wholeGraph[u].get(i).weight;
 		}
 		return Double.MAX_VALUE;
 	}
@@ -105,7 +109,7 @@ public class Graph {
 				if (mat[i][j] == true) {
 					for (int k = j+1;k < n;k++) {
 						if (mat[i][k] == true && mat[j][k] == true){
-							if(!calcTriProp(graph, i, j, k)) return false; //if found a triangle but not satisfying the property stop immediately
+							if(!calcTriProp(wholeGraph, i, j, k)) return false; //if found a triangle but not satisfying the property stop immediately
 							else flag = true; //if found a tri that satisfying has to check other possibilites before return true
 						}
 					}
@@ -171,6 +175,12 @@ public class Graph {
 		g.BL(BL);
 		return g.GETBL();
 	}
+	
+	public static boolean hasTriangleProp(String nameGraph){
+		Graph g = new Graph(nameGraph);
+		return g.satisfyTriProperty();
+	}
+	
 	public static boolean is_eqFile(String name1,String name2){
 		FileReader f1;
 		FileReader f2;
@@ -260,13 +270,13 @@ public class Graph {
 			numOfNodes = Integer.valueOf(line);
 			graph = new ArrayList[numOfNodes];
 			graphCopy = new ArrayList[numOfNodes];
+			wholeGraph = new ArrayList[numOfNodes];
 			line = bf.readLine();
 			numOfEdges = Integer.valueOf(line);
 
 			for (int i = 0; i < numOfEdges; i++) {
 				line = bf.readLine();
 				from=0; to=0;
-
 				String nodeXInput= "", nodeYInput = "", xyWeight = "";
 				StringTokenizer st = new StringTokenizer(line);
 				nodeXInput = st.nextToken();
@@ -280,21 +290,35 @@ public class Graph {
 
 				from = Integer.valueOf(nodeXInput);
 				to = Integer.valueOf(nodeYInput) ;
+//				System.out.println("from:" + from + ", to:" + to);
 				if(from <0 || to < 0)
 					throw new Exception("the V is negative! ");
 
 				if (graph[from] == null) {
 					graph[from] = new ArrayList<Edge>();
 				}
-
+				
+				if (wholeGraph[from] == null) {
+					wholeGraph[from] = new ArrayList<Edge>();
+				}
+				
+				wholeGraph[from].add(new Edge(to, xyWeightDouble));
 				graph[from].add(new Edge(to, xyWeightDouble));
 
 
 				if (graphCopy[to] == null) {
 					graphCopy[to] = new ArrayList<Edge>();
+//					System.out.println(to);
 				}
+				if(wholeGraph[to] == null) wholeGraph[to] = new ArrayList<Edge>();
 
+				wholeGraph[to].add(new Edge(from, xyWeightDouble));
 				graphCopy[to].add(new Edge(from, xyWeightDouble));
+				
+//				if(to == 100 || from == 100){
+//					System.out.println(to + " " + from);
+//					System.out.println(graph[40].size());
+//				}
 			}
 			in.close();
 		} catch (Exception e) {
@@ -306,6 +330,7 @@ public class Graph {
 			distance[i] = Double.POSITIVE_INFINITY;
 		}
 	}
+	
 	//black list. get the names of the files, one for the graph, the other for the black list
 	public void BL(String name_file_BL){
 		FileReader in;
@@ -480,6 +505,65 @@ public class Graph {
 	 * 
 	 * 
 	 * */
+	
+	
+	private double dijks(int start) {
+		this.startNode=start;
+		double[] dis = new double[numOfNodes];
+//		this.distance = new double[numOfNodes];
+		int max = 0;
+
+		for (int i = 0; i < numOfNodes; i++) {
+			dis[i] = Double.POSITIVE_INFINITY;
+		}
+
+		dis[start] = 0;
+
+		PriorityQueue<Node> priorityQueue = new PriorityQueue<>();
+		priorityQueue.add(new Node(start, 0, -1));
+
+		while (priorityQueue.size() > 0) {
+
+			Node min = priorityQueue.poll();
+			if ( wholeGraph[min.node]!=null){
+				Iterator<Edge> iterator = wholeGraph[min.node].iterator();
+
+				while (iterator.hasNext()) {
+					Edge curr = iterator.next();
+
+					if (dis[min.node] + curr.weight < dis[curr.to]) {
+						dis[curr.to] = dis[min.node] + curr.weight;
+						priorityQueue.add(new Node(curr.to, dis[curr.to], min.node));
+
+					}
+				}
+			}
+		}
+//		System.out.println(Arrays.toString(dis));
+		return findMaxNumberInArray(dis);
+	}
+	
+	
+	
+	public double findDiameterNew(){
+		double diam = 0;
+		for(int i = 0 ;i < wholeGraph.length ; i++){
+			double temp = dijks(i);
+			if( temp > diam) diam=temp;
+		}
+		
+		return diam;
+	}
+	
+	public double findRadiusNew(){
+		double rad = Double.MAX_VALUE;
+		for(int i = 0 ;i < wholeGraph.length ; i++){
+			double temp = dijks(i);
+			if( temp < rad) rad=temp;
+		}
+		
+		return rad;
+	}
 
 	//converting Edge graph to Integer graph
 	public ArrayList<Integer>[] edgeToIntGraph(){
@@ -496,9 +580,9 @@ public class Graph {
 /*
  * printing array list
  */
-	public void printArrayList(ArrayList<Integer> [] g){
-		for(int i = 0 ; i < g.length ; i ++){
-			System.out.println(Arrays.toString(g[i].toArray()));
+	public void printArrayList(){
+		for(int i = 0 ; i < wholeGraph.length ; i ++){
+			System.out.println(Arrays.toString(wholeGraph[i].toArray()));
 		}
 	}
 /*
@@ -573,33 +657,105 @@ public class Graph {
 	/*
 	 * returns the minimum number in the array
 	 */
-	public int findMinimalNumberInArray(int[] arr){
-		int min = Integer.MAX_VALUE;
+	public double findMinimalNumberInArray(double[] arr){
+		double min = Double.MAX_VALUE;
 		for(int i = 0 ; i < arr.length ; i++){
-			if(arr[i] < min) min = arr[i];
+			if(arr[i] < min && arr[i] > 0) min = arr[i];
 		}
 		return min;
+	}
+	
+	public double findMaxNumberInArray(double[] arr){
+		double max = 0;
+		for(int i = 0 ; i < arr.length ; i++){
+			if(arr[i] > max) max = arr[i];
+		}
+		return max;
 	}
 	/*
 	 * finding the radius of the graph
 	 */
-	public int findRadius(){
-		int[] radius = new int[graph.length];
-		for(int i  = 0 ; i < radius.length ; i++){
-			radius[i] = bfsAlgoDiameter(i);
-		}
-		return findMinimalNumberInArray(radius);
-	}
+//	public int findRadius(){
+//		int[] radius = new int[graph.length];
+//		for(int i  = 0 ; i < radius.length ; i++){
+//			radius[i] = bfsAlgoDiameter(i);
+//		}
+//		return findMinimalNumberInArray(radius);
+//	}
 	/*
 	 * finding the diameter by using twice bfs algo
 	 */
-	public int findDiameter2(){
+	public int findDiameter(){
 		int index = bfsAlgoIndex(0);
 		int diameterIndex = bfsAlgoDiameter(index);
 		return diameterIndex;
 	}
 
-	
+	/*
+
+	public int findDiameter(){
+		int size = graph.length;
+		int v = 0;
+		ArrayList<Integer>[] t = edgeToIntGraph();
+		ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(size);
+		int[] parent = new int[size];
+		int[] color = new int[size];
+		int[] dist = new int[size];
+		Arrays.fill(parent, -1);
+		Arrays.fill(dist, -1);
+		printArrayList(t);
+		//first time bfs
+		queue.add(v);
+		color[v] = gray;
+		dist[v] = 0;
+		while(!queue.isEmpty()){
+			int v2 = queue.poll();
+			for(int u : t[v2]){
+				if(color[u] == white){
+					color[u] = gray;
+					parent[u] = v2;
+					dist[u] = dist[v2] + 1;
+					queue.add(u);
+				}
+			}
+			color[v2] = black;
+		}
+
+		//find farest vertex
+		int index = findMinWeight(dist);
+
+		//do bfs again on smallest dist v
+		Arrays.fill(parent, -1);
+		Arrays.fill(dist, -1);
+		Arrays.fill(color, 0);
+
+
+		queue.add(index);
+		color[index] = gray;
+		dist[index] = 0;
+		while(!queue.isEmpty()){
+			int v2 = queue.poll();
+			for(int u : t[v2]){
+				if(color[u] == white){
+					color[u] = gray;
+					parent[u] = v2;
+					dist[u] = dist[v2] + 1;
+					queue.add(u);
+				}
+			}
+			color[v2] = black;
+		}
+
+		//go to farest vertex again and his dist is the diameter
+		index = findMinWeight(dist);
+//		System.out.println(Arrays.toString(dist));
+//		System.out.println(index);
+		return dist[index];
+
+
+	}
+
+	 */
 
 	/*
 	 * finding minimum weight in graph and returns it's index
@@ -619,5 +775,25 @@ public class Graph {
 
 
 
+	/*
+	 * end of diameter and radius func
+	 * */
+	
+	public void info(String file_name,String name_file_BL){
+		long start = new Date().getTime();
+		System.out.println(" Ex1: partual solution");
+		System.out.println("Loading graph file: " + file_name + " runing a test " + name_file_BL);
+		long s1 = new Date().getTime();
+		Graph g = new Graph(file_name);
+		System.out.println("Diameter is: " + g.findDiameterNew());
+		System.out.println("Radius is: " + g.findRadiusNew());
+		System.out.print("is the graph satisfying the triangle property?:");
+		if(g.satisfyTriProperty())  System.out.print("yes");
+		else System.out.print("no");
+		System.out.println();
+		g.BL(name_file_BL);
+		long s2 = new Date().getTime();
+		System.out.println("Done!!!  Total time: " + (s2 - start) + "  ms");
+	}
 
 }
