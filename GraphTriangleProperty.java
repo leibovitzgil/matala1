@@ -121,7 +121,6 @@ public class GraphTriangleProperty {
 		//		System.out.println(areTheyNeighbours(g, 2 ,3));
 
 		boolean mat[][] = neighboursMatrix(g);
-
 		//		printMat(mat);
 
 		//		findTriangles(mat);
