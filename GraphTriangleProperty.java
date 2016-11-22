@@ -128,7 +128,7 @@ public class GraphTriangleProperty {
 
 		//		System.out.println(findWeightBetween2Edges(g, 2, 4));
 
-		System.out.println(satisfyTriProperty(mat, g));
+// 		System.out.println(satisfyTriProperty(mat, g));
 	}
 
 }
