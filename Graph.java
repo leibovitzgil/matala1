@@ -619,8 +619,5 @@ public class Graph {
 
 
 
-	/*
-	 * end of diameter and radius func
-	 * */
 
 }
