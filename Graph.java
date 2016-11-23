@@ -672,16 +672,7 @@ public class Graph {
 		}
 		return max;
 	}
-	/*
-	 * finding the radius of the graph
-	 */
-//	public int findRadius(){
-//		int[] radius = new int[graph.length];
-//		for(int i  = 0 ; i < radius.length ; i++){
-//			radius[i] = bfsAlgoDiameter(i);
-//		}
-//		return findMinimalNumberInArray(radius);
-//	}
+
 	/*
 	 * finding the diameter by using twice bfs algo
 	 */
@@ -691,71 +682,6 @@ public class Graph {
 		return diameterIndex;
 	}
 
-	/*
-
-	public int findDiameter(){
-		int size = graph.length;
-		int v = 0;
-		ArrayList<Integer>[] t = edgeToIntGraph();
-		ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(size);
-		int[] parent = new int[size];
-		int[] color = new int[size];
-		int[] dist = new int[size];
-		Arrays.fill(parent, -1);
-		Arrays.fill(dist, -1);
-		printArrayList(t);
-		//first time bfs
-		queue.add(v);
-		color[v] = gray;
-		dist[v] = 0;
-		while(!queue.isEmpty()){
-			int v2 = queue.poll();
-			for(int u : t[v2]){
-				if(color[u] == white){
-					color[u] = gray;
-					parent[u] = v2;
-					dist[u] = dist[v2] + 1;
-					queue.add(u);
-				}
-			}
-			color[v2] = black;
-		}
-
-		//find farest vertex
-		int index = findMinWeight(dist);
-
-		//do bfs again on smallest dist v
-		Arrays.fill(parent, -1);
-		Arrays.fill(dist, -1);
-		Arrays.fill(color, 0);
-
-
-		queue.add(index);
-		color[index] = gray;
-		dist[index] = 0;
-		while(!queue.isEmpty()){
-			int v2 = queue.poll();
-			for(int u : t[v2]){
-				if(color[u] == white){
-					color[u] = gray;
-					parent[u] = v2;
-					dist[u] = dist[v2] + 1;
-					queue.add(u);
-				}
-			}
-			color[v2] = black;
-		}
-
-		//go to farest vertex again and his dist is the diameter
-		index = findMinWeight(dist);
-//		System.out.println(Arrays.toString(dist));
-//		System.out.println(index);
-		return dist[index];
-
-
-	}
-
-	 */
 
 	/*
 	 * finding minimum weight in graph and returns it's index
