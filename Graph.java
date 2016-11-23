@@ -151,7 +151,7 @@ public class Graph {
 		return g.MinDistanceTwoNode(end);
 	}
 	/**
-	 * This function calculates the path between tow vertex
+	 * This function calculates the path between two vertex
 	 * @param nameGraph the name of the file
 	 * @param start the start vertex
 	 * @param end the end vertex
