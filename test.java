@@ -38,32 +38,31 @@ public class test {
 	}
 	@Test
 	public void testMinPrice_tinyEWD() {
-		String name_file = "tinyEWD.txt";
-
-		assertEquals(0.26,Graph.MinPrice(name_file,0,2),0.00001);
-		assertEquals(0.6,Graph.MinPrice(name_file,0,7),0.00001);
-		assertEquals(0.73,Graph.MinPrice(name_file,0,5),0.00001);
-		assertEquals(0.91,Graph.MinPrice(name_file,7,6),0.00001);
-		assertEquals(0.62,Graph.MinPrice(name_file,2,5),0.00001);
-		assertEquals(1.83,Graph.MinPrice(name_file,1,5),0.00001);
-		assertEquals(1.49,Graph.MinPrice(name_file,7,0),0.00001);
+		String name_file = "tinyGraph.txt";
+		assertEquals(0.26,Graph.MinPrice2(name_file,0,2),0.00001);
+		assertEquals(0.6,Graph.MinPrice2(name_file,0,7),0.00001);
+		assertEquals(0.73,Graph.MinPrice2(name_file,0,5),0.00001);
+		assertEquals(0.74,Graph.MinPrice2(name_file,7,6),0.00001);
+		assertEquals(0.62,Graph.MinPrice2(name_file,2,5),0.00001);
+		assertEquals(0.32,Graph.MinPrice2(name_file,1,5),0.00001);
+		assertEquals(0.6,Graph.MinPrice2(name_file,7,0),0.00001);
 
 	}
 	@Test
 	public void testPath_tinyEWD()
 	{
-		String name_file = "tinyEWD.txt";
-		assertTrue(Graph.GetPath(name_file, 0, 7).equals("0->2->7"));
-		assertTrue(Graph.GetPath(name_file, 7, 6).equals("7->3->6"));
-		assertTrue(Graph.GetPath(name_file, 2, 5).equals("2->7->5"));
-		assertTrue(Graph.GetPath(name_file, 1, 5).equals("1->3->6->2->7->5"));
-		assertTrue(Graph.GetPath(name_file, 5, 1).equals("5->1"));
+		String name_file = "tinyGraph.txt";
+		assertTrue(Graph.GetPath2(name_file, 0, 7).equals("0->2->7"));
+		assertTrue(Graph.GetPath2(name_file, 7, 6).equals("7->2->6"));
+		assertTrue(Graph.GetPath2(name_file, 2, 5).equals("2->7->5"));
+		assertTrue(Graph.GetPath2(name_file, 1, 5).equals("1->5"));
+		assertTrue(Graph.GetPath2(name_file, 5, 1).equals("5->1"));
 	}
 
 	@Test
 	public void testBlackList_tinyEWD()
 	{
-		String name_file = "tinyEWD.txt";
+		String name_file = "tinyGraph.txt";
 		String name_file_BL = "test1.txt";
 		double[]black=Graph.GetMinPriceWithBL(name_file, name_file_BL);
 
@@ -71,45 +70,40 @@ public class test {
 		assertEquals(0.37,black[1],0.00001);
 		assertEquals(0.28,black[2],0.00001);
 		assertEquals(0.6000,black[3],0.00001);
-		assertEquals(1.49,black[4],0.00001);
 
 	}
 	
-//	public void testBlackList_Boaz(){
-//		String name_file = "tinyEWD.txt";
-//		String name_file_BL = "test1.txt";
-//	}
 
 	@Test
 	public void testMinPrice_tinyEWG() {
-		String name_file = "tinyEWG.txt";
+		String name_file = "tinyGraph2.txt";
 
-		assertEquals(0.95,Graph.MinPrice(name_file,0,6),0.00001);
-		assertEquals(1.74,Graph.MinPrice(name_file,1,4),0.00001);
-		assertEquals(0.34,Graph.MinPrice(name_file,2,7),0.00001);
-		assertEquals(Double.POSITIVE_INFINITY,Graph.MinPrice(name_file,7,6),0.00001);
-		assertEquals(1.8,Graph.MinPrice(name_file,3,5),0.00001);
-		assertEquals(0.32,Graph.MinPrice(name_file,1,5),0.00001);
+		assertEquals(0.58,Graph.MinPrice2(name_file,0,6),0.00001);
+		assertEquals(0.56,Graph.MinPrice2(name_file,1,4),0.00001);
+		assertEquals(0.34,Graph.MinPrice2(name_file,2,7),0.00001);
+		assertEquals(0.74,Graph.MinPrice2(name_file,7,6),0.00001);
+		assertEquals(0.61,Graph.MinPrice2(name_file,3,5),0.00001);
+		assertEquals(0.32,Graph.MinPrice2(name_file,1,5),0.00001);
 
 	}
 
 	@Test
 	public void testPath_tinyEWG()
 	{
-		String name_file = "tinyEWG.txt";
+		String name_file = "tinyGraph2.txt";
 
-		assertTrue(Graph.GetPath(name_file, 0, 7).equals("0->7"));
-		assertTrue(Graph.GetPath(name_file, 3, 5).equals("3->6->4->5"));
-		assertTrue(Graph.GetPath(name_file, 2, 4).equals("2->3->6->4"));
-		assertTrue(Graph.GetPath(name_file, 1, 0).equals("1->3->6->0"));
-		assertTrue(Graph.GetPath(name_file, 5, 6).equals("inf = no path!"));
+		assertTrue(Graph.GetPath2(name_file, 0, 7).equals("0->7"));
+		assertTrue(Graph.GetPath2(name_file, 3, 5).equals("3->1->5"));
+		assertTrue(Graph.GetPath2(name_file, 2, 4).equals("2->0->4"));
+		assertTrue(Graph.GetPath2(name_file, 1, 0).equals("1->7->0"));
+		assertTrue(Graph.GetPath2(name_file, 5, 6).equals("5->7->2->6"));
 	}
 	
 	
 	@Test
 	public void testBlackList_tinyEWG()
 	{
-		String name_file = "mediumEWD.txt";
+		String name_file = "mediumGraph2.txt";
 		String name_file_BL = "test2.txt";
 		double[]black=Graph.GetMinPriceWithBL(name_file, name_file_BL);
 
