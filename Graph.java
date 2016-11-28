@@ -309,9 +309,7 @@ public class Graph {
 			this.numOfQueries = Integer.valueOf(line);
 			blackList = new double[numOfQueries];
 			for(int i=0;i<blackList.length;i++){
-				System.out.println(i);
 				line = bf.readLine();
-				System.out.println(line);
 				String xNode = "", yNode = "", numOfBlackNodes = "";
 				int from = 0, to = 0, blackListLen = 0;
 				StringTokenizer st1 = new StringTokenizer(line);
@@ -333,13 +331,11 @@ public class Graph {
 					if(size>0){
 						for(int a =0;a<size;a++){
 							int neiNum = wholeGraph[index].get(a).to;
-//							System.out.println(neiNum);
 							rememeberGraphModify.add(wholeGraph[index].get(a).getWeight());//save
 							wholeGraph[index].get(a).setWeight(Double.MAX_VALUE);//remove
 							for( int k = 0 ; k < wholeGraph[neiNum].size(); k++){
 								if(wholeGraph[neiNum].get(k).to == index){
 									wholeGraph[neiNum].get(k).setWeight(Double.MAX_VALUE);
-//									System.out.println(wholeGraph[neiNum].get(k).getWeight());
 								}
 							}
 						}
@@ -350,7 +346,6 @@ public class Graph {
 				//djikstra
 				dijks2(from);
 				//the new distance when not passing through black nodes
-				System.out.println(distance[to]);
 				blackList[i]=distance[to];
 				//clear distance
 				for(int c=0;c<distance.length;c++){
@@ -366,15 +361,12 @@ public class Graph {
 					if(size>0){
 						for(int a =0;a<size;a++){
 							int neiNum = wholeGraph[index].get(a).to;
-//							System.out.println(neiNum);
 							double temp= rememeberGraphModify.get(a);//list[index].get(a).getWeight();//save
 							wholeGraph[index].get(a).setWeight(temp);
-//							System.out.println(wholeGraph[index].get(a).getWeight());
 							int k = 0;
 							for( k = 0 ; k < wholeGraph[neiNum].size(); k++){
 								if(wholeGraph[neiNum].get(k).to == index){
 									wholeGraph[neiNum].get(k).setWeight(temp);
-//									System.out.println(wholeGraph[neiNum].get(k).getWeight());
 								}
 							}
 						}
