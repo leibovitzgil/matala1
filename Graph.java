@@ -27,7 +27,8 @@ public class Graph {
 	List<Edge>[] graph;
 	List<Edge>[] wholeGraph;
 	double maxWeights;
-
+	List<Edge>[] graphCopy;
+	double [] blackList;
 
 	public int getNumOfNodes() {
 		return numOfNodes;
@@ -35,8 +36,6 @@ public class Graph {
 	public int getNumOfEdges() {
 		return numOfEdges;
 	}
-	List<Edge>[] graphCopy;
-	double [] blackList;
 
 	/*
 	 * 
@@ -55,12 +54,8 @@ public class Graph {
 	//creates connectivty matrix
 	public boolean [][] neighboursMatrix(){
 		boolean[][] mat = new boolean[wholeGraph.length][wholeGraph.length];
-//		System.out.println(graph.length);
-//		System.out.println(graph[99].size());
 		for(int i = 0 ; i < wholeGraph.length ; i++){
 			for(int j = 0 ; j < wholeGraph.length ; j++){
-
-//				System.out.println(i + " " + j);
 				if(areTheyNeighbours( i, j))
 					mat[i][j] = true;
 			}
@@ -148,6 +143,18 @@ public class Graph {
 	public static double MinPrice(String nameGraph,int start,int end){
 		Graph g = new Graph(nameGraph);
 		g.findShortestPaths(start);
+		double ans1 = g.MinDistanceTwoNode(end);
+		g.findShortestPaths(end);
+		double ans2 = g.MinDistanceTwoNode(start);
+		if( ans1>ans2) return ans2;
+		return ans1;
+	}
+
+
+
+	public static double MinPrice2(String nameGraph,int start,int end){
+		Graph g = new Graph(nameGraph);
+		g.dijks2(start);
 		return g.MinDistanceTwoNode(end);
 	}
 	/**
@@ -157,9 +164,10 @@ public class Graph {
 	 * @param end the end vertex
 	 * @return string of the path
 	 */
-	public static String GetPath(String nameGraph,int start,int end){
+
+	public static String GetPath2(String nameGraph,int start,int end){
 		Graph g = new Graph(nameGraph);
-		g.findShortestPaths(start);
+		g.dijks2(start);
 		return g.getPath(start,end);
 	}
 
@@ -172,46 +180,19 @@ public class Graph {
 	 */
 	public static double[] GetMinPriceWithBL(String nameGraph,String BL){
 		Graph g = new Graph(nameGraph);
-		g.BL(BL);
+		g.BL2(BL);
 		return g.GETBL();
 	}
-	
+
 	public static boolean hasTriangleProp(String nameGraph){
 		Graph g = new Graph(nameGraph);
 		return g.satisfyTriProperty();
 	}
-	
-	public static boolean is_eqFile(String name1,String name2){
-		FileReader f1;
-		FileReader f2;
-		try {
-			f1 = new FileReader(name1);
-			f2 = new FileReader(name2);
 
 
-			BufferedReader bf1 = new BufferedReader(f1);
-			BufferedReader bf2 = new BufferedReader(f2);
-			String s1 = "";
-			String s2 = "";
-			while(s1!=null || s2!=null){
-
-				if(!s1.equalsIgnoreCase(s2)) return false;
-				s1 = bf1.readLine();
-				s2 = bf2.readLine();
-			}
-			if((s1==null&& s2!=null) || (s1!=null&& s2==null)) return false;
-			else return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-
-		}
-
-	}
-	public static void printToFile(String BLname,double [] arr){
+	public static void printToFile(String BLname,double [] arr,int numOfNodes,int numOfEdges,boolean tie,double dia, double rad, long runtime){
 		FileReader f;
 		File fww ;
-		//		String a =   " AnsTo"+BLname;
 		String a =   " AnsTo";
 
 
@@ -231,13 +212,13 @@ public class Graph {
 				if(arr[i]==Double.POSITIVE_INFINITY){
 					fw.write(s +"  " + "inf = no path!\n");
 					i++;
-					//continue;
 				}
 				else{
 					fw.write(s + "  " + arr[i++] +"\n");	
 				}
 				s = bf.readLine();
 			}
+			fw.write("Graph: |V| = " +numOfNodes + ", |E| = " + numOfEdges + ", TIE?" + tie + ", Radius:" + rad + ", Diameter:" + dia + " runtime:" + runtime +" ms." );
 			bf.close();
 			f.close();
 			fw.close();
@@ -253,13 +234,11 @@ public class Graph {
 	///////////////////////////////////////////////////////////////////////////////////
 	//constructor of the graph, get the name of the file and a start vertex
 	public Graph(String name_file){
-		createGraph(name_file);
-		//this.startNode = start;
-
+		createGraph2(name_file);
 	}
 
-	//create the graph, get name of the file and a start vertex
-	private void createGraph(String Graph_name_file) {
+
+	private void createGraph2(String Graph_name_file) {
 		String line = "";
 		int from=0, to=0;
 		FileReader in;
@@ -268,8 +247,6 @@ public class Graph {
 			BufferedReader bf = new BufferedReader(in);
 			line = bf.readLine();
 			numOfNodes = Integer.valueOf(line);
-			graph = new ArrayList[numOfNodes];
-			graphCopy = new ArrayList[numOfNodes];
 			wholeGraph = new ArrayList[numOfNodes];
 			line = bf.readLine();
 			numOfEdges = Integer.valueOf(line);
@@ -290,37 +267,26 @@ public class Graph {
 
 				from = Integer.valueOf(nodeXInput);
 				to = Integer.valueOf(nodeYInput) ;
-//				System.out.println("from:" + from + ", to:" + to);
 				if(from <0 || to < 0)
 					throw new Exception("the V is negative! ");
 
-				if (graph[from] == null) {
-					graph[from] = new ArrayList<Edge>();
-				}
-				
+
 				if (wholeGraph[from] == null) {
 					wholeGraph[from] = new ArrayList<Edge>();
 				}
 				
+//				System.out.println("from:" + to + " to:" + from);
 				wholeGraph[from].add(new Edge(to, xyWeightDouble));
-				graph[from].add(new Edge(to, xyWeightDouble));
-
-
-				if (graphCopy[to] == null) {
-					graphCopy[to] = new ArrayList<Edge>();
-//					System.out.println(to);
-				}
-				if(wholeGraph[to] == null) wholeGraph[to] = new ArrayList<Edge>();
-
-				wholeGraph[to].add(new Edge(from, xyWeightDouble));
-				graphCopy[to].add(new Edge(from, xyWeightDouble));
 				
-//				if(to == 100 || from == 100){
-//					System.out.println(to + " " + from);
-//					System.out.println(graph[40].size());
-//				}
+
+				if(wholeGraph[to] == null) wholeGraph[to] = new ArrayList<Edge>();
+//				System.out.println("to:" + to + " from" + from);
+				wholeGraph[to].add(new Edge(from, xyWeightDouble));
+
 			}
 			in.close();
+			bf.close();     //added now!
+//			printArrayList();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -330,22 +296,22 @@ public class Graph {
 			distance[i] = Double.POSITIVE_INFINITY;
 		}
 	}
-	
-	//black list. get the names of the files, one for the graph, the other for the black list
-	public void BL(String name_file_BL){
+
+	//the black list function!!
+	public void BL2(String name_file_BL){
 		FileReader in;
 		String line = "",blackNode="";
 		try {
 			in = new FileReader(name_file_BL);
 			BufferedReader bf = new BufferedReader(in);
 			line = bf.readLine();
-			//			System.out.println("got here!!!!!!");
 
 			this.numOfQueries = Integer.valueOf(line);
 			blackList = new double[numOfQueries];
-
 			for(int i=0;i<blackList.length;i++){
+				System.out.println(i);
 				line = bf.readLine();
+				System.out.println(line);
 				String xNode = "", yNode = "", numOfBlackNodes = "";
 				int from = 0, to = 0, blackListLen = 0;
 				StringTokenizer st1 = new StringTokenizer(line);
@@ -359,26 +325,32 @@ public class Graph {
 				if (blackListLen < 0 || from <0 || to < 0) {				
 					throw new Exception("can't be negative.");
 				}
-
 				ArrayList<Double> rememeberGraphModify = new ArrayList<Double>();
 				for(int j=0;j<blackListLen;j++){
 					blackNode = st1.nextToken();
 					int index = Integer.valueOf(blackNode);
-					int size = graph[index].size();
+					int size = wholeGraph[index].size();
 					if(size>0){
 						for(int a =0;a<size;a++){
-							rememeberGraphModify.add(graph[index].get(a).getWeight());//save
-							graph[index].get(a).setWeight(Double.POSITIVE_INFINITY);//remove
+							int neiNum = wholeGraph[index].get(a).to;
+//							System.out.println(neiNum);
+							rememeberGraphModify.add(wholeGraph[index].get(a).getWeight());//save
+							wholeGraph[index].get(a).setWeight(Double.MAX_VALUE);//remove
+							for( int k = 0 ; k < wholeGraph[neiNum].size(); k++){
+								if(wholeGraph[neiNum].get(k).to == index){
+									wholeGraph[neiNum].get(k).setWeight(Double.MAX_VALUE);
+//									System.out.println(wholeGraph[neiNum].get(k).getWeight());
+								}
+							}
 						}
 					}
 				}
 
-				//				System.out.println("got here!!!!!!");
 
 				//djikstra
-				findShortestPaths2(from);
-
+				dijks2(from);
 				//the new distance when not passing through black nodes
+				System.out.println(distance[to]);
 				blackList[i]=distance[to];
 				//clear distance
 				for(int c=0;c<distance.length;c++){
@@ -390,20 +362,31 @@ public class Graph {
 				for(int j=0;j<blackListLen;j++){
 					blackNode = st2.nextToken();
 					int index = Integer.valueOf(blackNode);
-					int size = graph[index].size();
+					int size = wholeGraph[index].size();
 					if(size>0){
 						for(int a =0;a<size;a++){
+							int neiNum = wholeGraph[index].get(a).to;
+//							System.out.println(neiNum);
 							double temp= rememeberGraphModify.get(a);//list[index].get(a).getWeight();//save
-							graph[index].get(a).setWeight(temp);//return the val
+							wholeGraph[index].get(a).setWeight(temp);
+//							System.out.println(wholeGraph[index].get(a).getWeight());
+							int k = 0;
+							for( k = 0 ; k < wholeGraph[neiNum].size(); k++){
+								if(wholeGraph[neiNum].get(k).to == index){
+									wholeGraph[neiNum].get(k).setWeight(temp);
+//									System.out.println(wholeGraph[neiNum].get(k).getWeight());
+								}
+							}
 						}
+
 					}
+					in.close();
 				}
 			}
-			in.close();
 		}
 
+
 		catch(Exception e ){}
-		printToFile(name_file_BL,blackList);
 	}
 
 	public double [] GETBL(){
@@ -415,7 +398,7 @@ public class Graph {
 
 	// return string of the shortest path
 	public String getPath(int st,int end){
-		findShortestPaths(st);
+		dijks2(st);
 		if(distance[end]==Double.POSITIVE_INFINITY)
 			return "inf = no path!";	
 		String path="";
@@ -425,7 +408,7 @@ public class Graph {
 
 		while (pathFinder!=startNode ){
 
-			iterator = graphCopy[pathFinder].iterator();
+			iterator = wholeGraph[pathFinder].iterator();
 			boolean flag = true;
 			while (iterator.hasNext()&&flag) {
 
@@ -473,31 +456,6 @@ public class Graph {
 			}
 		}
 	}
-	// function of the black list, update the price of the edges
-	private void findShortestPaths2(int start) {
-
-		distance[start] = 0;
-		PriorityQueue<Node> priorityQueue = new PriorityQueue<>();
-		priorityQueue.add(new Node(start, 0, -1));
-
-		while (priorityQueue.size() > 0) {
-
-			Node min = priorityQueue.poll();
-			if ( graph[min.node]!=null){
-				Iterator<Edge> iterator = graph[min.node].iterator();
-
-				while (iterator.hasNext()) {
-					Edge curr = iterator.next();
-
-					if (distance[min.node] + curr.weight < distance[curr.to]) {
-						distance[curr.to] = distance[min.node] + curr.weight;
-						priorityQueue.add(new Node(curr.to, distance[curr.to], min.node));
-
-					}
-				}
-			}
-		}
-	}
 
 	/*
 	 * 
@@ -505,14 +463,10 @@ public class Graph {
 	 * 
 	 * 
 	 * */
-	
-	
+
 	private double dijks(int start) {
 		this.startNode=start;
 		double[] dis = new double[numOfNodes];
-//		this.distance = new double[numOfNodes];
-		int max = 0;
-
 		for (int i = 0; i < numOfNodes; i++) {
 			dis[i] = Double.POSITIVE_INFINITY;
 		}
@@ -539,42 +493,69 @@ public class Graph {
 				}
 			}
 		}
-//		System.out.println(Arrays.toString(dis));
 		return findMaxNumberInArray(dis);
 	}
-	
-	
-	
+
+
+	private double dijks2(int start) {
+		this.startNode=start;
+		distance = new double[numOfNodes];
+		int max = 0;
+
+		for (int i = 0; i < numOfNodes; i++) {
+			distance[i] = Double.POSITIVE_INFINITY;
+		}
+
+		distance[start] = 0;
+
+		PriorityQueue<Node> priorityQueue = new PriorityQueue<>();
+		priorityQueue.add(new Node(start, 0, -1));
+
+		while (priorityQueue.size() > 0) {
+
+			Node min = priorityQueue.poll();
+			if ( wholeGraph[min.node]!=null){
+				Iterator<Edge> iterator = wholeGraph[min.node].iterator();
+
+				while (iterator.hasNext()) {
+					Edge curr = iterator.next();
+
+					if (distance[min.node] + curr.weight < distance[curr.to]) {
+						distance[curr.to] = distance[min.node] + curr.weight;
+						priorityQueue.add(new Node(curr.to, distance[curr.to], min.node));
+
+					}
+				}
+			}
+		}
+		return findMaxNumberInArray(distance);
+	}
+
+
+
+
+
 	public double findDiameterNew(){
 		double diam = 0;
 		for(int i = 0 ;i < wholeGraph.length ; i++){
 			double temp = dijks(i);
 			if( temp > diam) diam=temp;
 		}
-		
+
 		return diam;
 	}
-	
+
 	public double findRadiusNew(){
 		double rad = Double.MAX_VALUE;
 		for(int i = 0 ;i < wholeGraph.length ; i++){
 			double temp = dijks(i);
 			if( temp < rad) rad=temp;
 		}
-		
+
 		return rad;
 	}
 
-/*
- * printing array list
- */
-	public void printArrayList(){
-		for(int i = 0 ; i < wholeGraph.length ; i ++){
-			System.out.println(Arrays.toString(wholeGraph[i].toArray()));
-		}
-	}
 
-	
 	/*
 	 * returns the minimum number in the array
 	 */
@@ -585,7 +566,7 @@ public class Graph {
 		}
 		return min;
 	}
-	
+
 	public double findMaxNumberInArray(double[] arr){
 		double max = 0;
 		for(int i = 0 ; i < arr.length ; i++){
@@ -597,22 +578,23 @@ public class Graph {
 	/*
 	 * end of diameter and radius func
 	 * */
-	
+	public void printArrayList(){
+		for(int i = 0 ; i < wholeGraph.length ; i ++){
+			System.out.println(Arrays.toString(wholeGraph[i].toArray()));
+		}
+	}
+
 	public void info(String file_name,String name_file_BL){
 		long start = new Date().getTime();
-		System.out.println(" Ex1: partual solution");
-		System.out.println("Loading graph file: " + file_name + " runing a test " + name_file_BL);
 		long s1 = new Date().getTime();
 		Graph g = new Graph(file_name);
-		System.out.println("Diameter is: " + g.findDiameterNew());
-		System.out.println("Radius is: " + g.findRadiusNew());
-		System.out.print("is the graph satisfying the triangle property?:");
-		if(g.satisfyTriProperty())  System.out.print("yes");
-		else System.out.print("no");
-		System.out.println();
-		g.BL(name_file_BL);
+		double dia = findDiameterNew();
+		double rad = findRadiusNew();
+		boolean tie = satisfyTriProperty();
+		BL2(name_file_BL);
 		long s2 = new Date().getTime();
-		System.out.println("Done!!!  Total time: " + (s2 - start) + "  ms");
+		long runtime = s2-start;
+		printToFile(name_file_BL, blackList, numOfNodes, numOfEdges, tie, dia, rad, runtime);
 	}
 
 }
